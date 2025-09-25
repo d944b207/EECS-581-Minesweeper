@@ -154,6 +154,7 @@ let minesPlaced = false; // track if mines are randomly placed
 let gameOver = true; // game completion status
 let revealedCount = 0; // number of safe cells revealed
 let minePositions = new Set(); // storage for mine coordinates as strings
+let botClicking;
 
 /* === Helpers === */
 // update game status display
@@ -313,12 +314,15 @@ function buildBoard() {
           cell.classList.remove('covered');
           cell.classList.add('revealed','mine');
           cell.textContent = '💣';
+          clearInterval(botClicking);
           gameOver = true;
           setStatus('Game over', 'lost');
           revealMines();
         } else {
           revealedCount += floodReveal(row, col);
           checkWin();
+          cell.classList.remove('covered');
+          cell.classList.add('revealed');
         }
       });
 
@@ -376,16 +380,20 @@ function resetGame() {
 
 function startBotGame() {
   startGame();
-  let count = 0;
-  setInterval(botClick, 1000);
+  botClicking = setInterval(botClick, 400);
 }
 
 function botClick() {
   let randomRow = Math.floor(Math.random() * 10);
   let randomCol = Math.floor(Math.random() * 10);
-  let cell = document.querySelector(`.cell covered, [data-row="${randomRow}"], [data-col="${randomCol}]"`);
-  console.log(`Bot clicks cell in row ${cell.dataset.row}, column ${cell.dataset.col}`);
-  cell.click();
+  let cell = document.querySelector(`.cell.covered[data-row="${randomRow}"][data-col="${randomCol}"]`);
+  if (cell) {
+    console.log(`Bot clicks cell in row ${cell.dataset.row}, column ${cell.dataset.col}`);
+    cell.click();
+  }
+  else {
+    console.log(`Invalid selected cell: row ${randomRow}, column ${randomCol}`)
+  }
 }
 
 /* === Controls wiring === */
