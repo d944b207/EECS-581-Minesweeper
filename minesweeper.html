@@ -380,7 +380,7 @@ function resetGame() {
 
 function startBotGame() {
   startGame();
-  botClicking = setInterval(botClick, 400);
+  botClicking = setInterval(botClick, 500);
 }
 
 function botClick() {
@@ -392,7 +392,7 @@ function botClick() {
     cell.click();
   }
   else {
-    console.log(`Invalid selected cell: row ${randomRow}, column ${randomCol}`)
+    botClick();
   }
 }
 
