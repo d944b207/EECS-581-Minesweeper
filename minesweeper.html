@@ -386,13 +386,11 @@ function resetGame() {
 
 function startBotGame() {
   startGame();
-  botClicking = setInterval(botClick, 500);
+  let botDifficulty = document.getElementById("botSelect").value;
+  botClicking = setInterval(botClick(botDifficulty), 500);
 }
 
-function botClick() {
-  const botDifficulty = document.getElementById("botSelect").value;
-  console.log(botDifficulty);
-
+function botClick(botDifficulty) {
   if (botDifficulty == "easy") {
     let randomRow = Math.floor(Math.random() * 10);
     let randomCol = Math.floor(Math.random() * 10);
@@ -405,28 +403,28 @@ function botClick() {
       botClick();
     }
   } else if (botDifficulty == "medium") {
+    botClick("easy");
     // Source: https://stackoverflow.com/questions/37098405/javascript-queryselector-find-div-by-innertext
     cell = Array.from(document.querySelectorAll('.cell.revealed')).find(el => el.textContent != '');
     console.log(cell);
-    const row = cell.dataset.row;
-    const col = cell.dataset.col;
-    console.log(row);
-    console.log(col);
+    const row = parseInt(cell.dataset.row);
+    const col = parseInt(cell.dataset.col);
+
     // Hidden neighbors
-    let topLeft = getCell(row-1, col-1);
-    console.log(row+1);
-    let topMid = getCell(row-1, col);
-    let topRight = getCell(row-1, col+1);
-    let midLeft = getCell(row, col-1);
-    let midRight = getCell(row, col+1);
-    let bottomLeft = getCell(row+1, col-1);
-    let bottomMid = getCell(row+1, col);
-    let bottomRight = getCell(row+1, col+1);
+    let topLeft = document.querySelector(`.cell.covered[data-row="${row-1}"][data-col="${col-1}"]`);
+    let topMid = document.querySelector(`.cell.covered[data-row="${row-1}"][data-col="${col}"]`);
+    let topRight = document.querySelector(`.cell.covered[data-row="${row-1}"][data-col="${col+1}"]`);
+    let midLeft = document.querySelector(`.cell.covered[data-row="${row}"][data-col="${col-1}"]`);
+    let midRight = document.querySelector(`.cell.covered[data-row="${row}"][data-col="${col+1}"]`);
+    let bottomLeft = document.querySelector(`.cell.covered[data-row="${row+1}"][data-col="${col-1}"]`);
+    let bottomMid = document.querySelector(`.cell.covered[data-row="${row+1}"][data-col="${col}"]`);
+    let bottomRight = document.querySelector(`.cell.covered[data-row="${row+1}"][data-col="${col+1}"]`);
 
     let neighbors = [topLeft, topMid, topRight, midLeft, midRight, bottomLeft, bottomMid, bottomRight];
     neighbors.forEach((neighbor) => {
       console.log(neighbor);
     });
+
   } else { // hard difficulty
 
   }
