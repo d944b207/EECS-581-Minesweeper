@@ -391,7 +391,6 @@ function startBotGame() {
     botClicking = setInterval(easyBotClick, 500);
   }
   else if (botDifficulty == "medium") {
-    easyBotClick();
     botClicking = setInterval(mediumBotClick, 1000);
   }
 }
@@ -409,58 +408,59 @@ function easyBotClick() {
     }
 }
 
-function mediumBotClick() {
-    // Source: https://stackoverflow.com/questions/37098405/javascript-queryselector-find-div-by-innertext
-    // Get a random (well more like the first queried) revealed cell that has a value
-    cell = Array.from(document.querySelectorAll('.cell.revealed')).find(el => el.textContent != '');
+function mediumBotClick() { 
+  let revealed_cells = Array.from(document.querySelectorAll('.cell.revealed'));
+  console.log(revealed_cells);
 
-    console.log(cell);
-    const row = parseInt(cell.dataset.row);
-    const col = parseInt(cell.dataset.col);
+  revealed_cells.forEach(cell => {
+    if(cell.textContent != '') {
+      console.log(cell);
+      const row = parseInt(cell.dataset.row);
+      const col = parseInt(cell.dataset.col);
 
-    // Gets all neighbors
-    let topLeft = document.querySelector(`.cell.covered[data-row="${row-1}"][data-col="${col-1}"]`);
-    let topMid = document.querySelector(`.cell.covered[data-row="${row-1}"][data-col="${col}"]`);
-    let topRight = document.querySelector(`.cell.covered[data-row="${row-1}"][data-col="${col+1}"]`);
-    let midLeft = document.querySelector(`.cell.covered[data-row="${row}"][data-col="${col-1}"]`);
-    let midRight = document.querySelector(`.cell.covered[data-row="${row}"][data-col="${col+1}"]`);
-    let bottomLeft = document.querySelector(`.cell.covered[data-row="${row+1}"][data-col="${col-1}"]`);
-    let bottomMid = document.querySelector(`.cell.covered[data-row="${row+1}"][data-col="${col}"]`);
-    let bottomRight = document.querySelector(`.cell.covered[data-row="${row+1}"][data-col="${col+1}"]`);
-    let neighbors = [topLeft, topMid, topRight, midLeft, midRight, bottomLeft, bottomMid, bottomRight];
-    neighbors = neighbors.filter(neighbor => neighbor !== null);  // Filter out neighbors that aren't there
+      // Gets all neighbors
+      let topLeft = document.querySelector(`.cell.covered[data-row="${row-1}"][data-col="${col-1}"]`);
+      let topMid = document.querySelector(`.cell.covered[data-row="${row-1}"][data-col="${col}"]`);
+      let topRight = document.querySelector(`.cell.covered[data-row="${row-1}"][data-col="${col+1}"]`);
+      let midLeft = document.querySelector(`.cell.covered[data-row="${row}"][data-col="${col-1}"]`);
+      let midRight = document.querySelector(`.cell.covered[data-row="${row}"][data-col="${col+1}"]`);
+      let bottomLeft = document.querySelector(`.cell.covered[data-row="${row+1}"][data-col="${col-1}"]`);
+      let bottomMid = document.querySelector(`.cell.covered[data-row="${row+1}"][data-col="${col}"]`);
+      let bottomRight = document.querySelector(`.cell.covered[data-row="${row+1}"][data-col="${col+1}"]`);
+      let neighbors = [topLeft, topMid, topRight, midLeft, midRight, bottomLeft, bottomMid, bottomRight];
+      neighbors = neighbors.filter(neighbor => neighbor !== null);  // Filter out neighbors that aren't there
 
-    // Rule 1: If the number of hidden neighbors of a revealed cell equals that cell’s number
-    if (neighbors.length == countAdjacentMines(row, col)) {
-        neighbors.forEach((neighbor) => {
-          console.log(`Flagging cell in row ${neighbor.dataset.row}, column ${neighbor.dataset.col} `)
-          neighbor.dispatchEvent(rightClickEvent); // the AI should flag all hidden neighbors
-      });
+      // Rule 1: If the number of hidden neighbors of a revealed cell equals that cell’s number
+      if (neighbors.length == countAdjacentMines(row, col)) {
+          neighbors.forEach((neighbor) => {
+            console.log(`Flagging cell in row ${neighbor.dataset.row}, column ${neighbor.dataset.col} `)
+            neighbor.dispatchEvent(rightClickEvent); // the AI should flag all hidden neighbors
+        });
+      }
+
+      // Get flagged neighbors
+      topLeft = document.querySelector(`.cell.covered.flagged.flag-icon[data-row="${row-1}"][data-col="${col-1}"]`);
+      topMid = document.querySelector(`.cell.covered.flagged.flag-icon[data-row="${row-1}"][data-col="${col}"]`);
+      topRight = document.querySelector(`.cell.covered.flagged.flag-icon[data-row="${row-1}"][data-col="${col+1}"]`);
+      midLeft = document.querySelector(`.cell.covered.flagged.flag-icon[data-row="${row}"][data-col="${col-1}"]`);
+      midRight = document.querySelector(`.cell.covered.flagged.flag-icon[data-row="${row}"][data-col="${col+1}"]`);
+      bottomLeft = document.querySelector(`.cell.covered.flagged.flag-icon[data-row="${row+1}"][data-col="${col-1}"]`);
+      bottomMid = document.querySelector(`.cell.covered.flagged.flag-icon[data-row="${row+1}"][data-col="${col}"]`);
+      bottomRight = document.querySelector(`.cell.covered.flagged.flag-icon[data-row="${row+1}"][data-col="${col+1}"]`);
+      neighbors = [topLeft, topMid, topRight, midLeft, midRight, bottomLeft, bottomMid, bottomRight];
+      neighbors = neighbors.filter(neighbor => neighbor !== null);  // Filter out neighbors that aren't there
+
+      // Rule 2: If the number of flagged neighbors of a revealed cell equals that cell’s number
+      if (neighbors.length == countAdjacentMines(row, col)) {
+          neighbors.forEach((neighbor) => {
+            neighbor.click(); // the AI should open all other hidden neighbors
+        });
+      }
     }
+  });
 
-    // Get flagged neighbors
-    topLeft = document.querySelector(`.cell.covered.flagged.flag-icon[data-row="${row-1}"][data-col="${col-1}"]`);
-    topMid = document.querySelector(`.cell.covered.flagged.flag-icon[data-row="${row-1}"][data-col="${col}"]`);
-    topRight = document.querySelector(`.cell.covered.flagged.flag-icon[data-row="${row-1}"][data-col="${col+1}"]`);
-    midLeft = document.querySelector(`.cell.covered.flagged.flag-icon[data-row="${row}"][data-col="${col-1}"]`);
-    midRight = document.querySelector(`.cell.covered.flagged.flag-icon[data-row="${row}"][data-col="${col+1}"]`);
-    bottomLeft = document.querySelector(`.cell.covered.flagged.flag-icon[data-row="${row+1}"][data-col="${col-1}"]`);
-    bottomMid = document.querySelector(`.cell.covered.flagged.flag-icon[data-row="${row+1}"][data-col="${col}"]`);
-    bottomRight = document.querySelector(`.cell.covered.flagged.flag-icon[data-row="${row+1}"][data-col="${col+1}"]`);
-    neighbors = [topLeft, topMid, topRight, midLeft, midRight, bottomLeft, bottomMid, bottomRight];
-    neighbors = neighbors.filter(neighbor => neighbor !== null);  // Filter out neighbors that aren't there
-
-    // Rule 2: If the number of flagged neighbors of a revealed cell equals that cell’s number
-    if (neighbors.length == countAdjacentMines(row, col)) {
-        neighbors.forEach((neighbor) => {
-          neighbor.click(); // the AI should open all other hidden neighbors
-      });
-    }
-    else {
-      easyBotClick();
-      mediumBotClick();
-    }
-
+  //If no rule applies, the AI should pick a random hidden cell.
+  easyBotClick();
 }
 
 // SOURCE: Google AI result
