@@ -59,9 +59,6 @@ Source: Original, ChatGPT
     font-weight: bold;
     font-size: 14px;
   }
-  .column-label:first-child {
-    /* Empty corner cell */
-  }
 
   /* Game board with row labels */
   #game-board {
@@ -109,6 +106,19 @@ Source: Original, ChatGPT
   <input id="mineNumber" type="number" min="10" max="20" value="10">
   <button id="startBtn">Start Game</button>
   <button id="resetBtn" disabled>Reset</button>
+  
+  <label for="aiMode">AI Mode:</label>
+  <select id="aiMode">
+    <option value="easy">Easy</option>
+    <option value="medium">Medium</option>
+    <option value="hard">Hard</option>
+  </select>
+  <label for="aiPlay">Play:</label>
+  <select id="aiPlay">
+    <option value="auto">Auto</option>
+    <option value="interactive">Interactive</option>
+  </select>
+  <button id="aiToggle">Start AI</button>
 </div>
 
 <div id="status">
@@ -140,6 +150,11 @@ const startBtn = document.getElementById('startBtn');
 const resetBtn = document.getElementById('resetBtn');
 const mineRange  = document.getElementById('mineRange');
 const mineNumber = document.getElementById('mineNumber');
+const aiModeSel = document.getElementById('aiMode');
+const aiPlaySel = document.getElementById('aiPlay');
+const aiToggleBtn = document.getElementById('aiToggle');
+const flagAudio = new Audio('./flag.m4a'); //flag audio here
+flagAudio.preload = 'auto'; //preload audio file immediately (necessary for other sound effects too)
 
 /* Range/number bounds */
 mineRange.max = 20; // max mines allowed
@@ -153,6 +168,10 @@ let minesPlaced = false; // track if mines are randomly placed
 let gameOver = true; // game completion status
 let revealedCount = 0; // number of safe cells revealed
 let minePositions = new Set(); // storage for mine coordinates as strings
+let aiRunning = false;
+let aiIntervalId = null;
+let aiMode = 'easy';
+let aiPlayMode = 'auto';
 
 /* === Helpers === */
 // update game status display
@@ -315,15 +334,22 @@ function buildBoard() {
           gameOver = true;
           setStatus('Game over', 'lost');
           revealMines();
+          stopAI();
         } else {
           revealedCount += floodReveal(row, col);
+          updateCounters();
           checkWin();
         }
+
+        
+        maybeAIAfterPlayerTurn();
       });
 
       // Right click (flag)
       cell.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
+        flagAudio.currentTime = 0; //Set up right click (flag) audio
+        flagAudio.play().catch(() => { /* ignore play errors */ }); //Play right click (flag) audio
+        e.preventDefault(); //prevent default dropdown menu on right click:
         if (gameOver) return;
         if (cell.classList.contains('revealed')) return;
 
@@ -339,6 +365,8 @@ function buildBoard() {
           flagsPlaced--;
         }
         updateCounters();
+        
+        maybeAIAfterPlayerTurn();
       });
 
       board.appendChild(cell);
@@ -366,6 +394,8 @@ function startGame() {
   buildBoard();
 
   resetBtn.disabled = false;
+
+  stopAI();
 }
 
 function resetGame() {
@@ -388,6 +418,138 @@ mineNumber.addEventListener('input', () => {
 
 startBtn.addEventListener('click', startGame);
 resetBtn.addEventListener('click', resetGame);
+
+function allCells() {
+  const cells = [];
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE; c++) cells.push([r,c]);
+  }
+  return cells;
+}
+
+function randomUncoveredCell() {
+  const candidates = [];
+  document.querySelectorAll('.cell.covered').forEach(cell => {
+    if (!cell.classList.contains('flagged')) {
+      candidates.push([Number(cell.dataset.row), Number(cell.dataset.col)]);
+    }
+  });
+  if (candidates.length === 0) return null;
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+function aiPickEasy() {
+  return randomUncoveredCell();
+}
+
+function aiPickMedium() {
+  const priority = [];
+  document.querySelectorAll('.cell.revealed').forEach(cell => {
+    const adjText = cell.textContent.trim();
+    const r = Number(cell.dataset.row), c = Number(cell.dataset.col);
+    if (adjText === '' || /^[0-8]$/.test(adjText)) {
+      for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+        if (dr === 0 && dc === 0) continue;
+        const nr = r + dr, nc = c + dc;
+        if (!isInBounds(nr,nc)) continue;
+        const ncell = getCell(nr,nc);
+        if (ncell && ncell.classList.contains('covered') && !ncell.classList.contains('flagged')) {
+          priority.push([nr,nc]);
+        }
+      }
+    }
+  });
+  if (priority.length > 0) return priority[Math.floor(Math.random() * priority.length)];
+  // fallback: random
+  return randomUncoveredCell();
+}
+
+function aiPickHard() {
+  //Implement hard mode here:
+}
+
+function aiPickMove() {
+  if (aiMode === 'easy') return aiPickEasy();
+  if (aiMode === 'medium') return aiPickMedium();
+  if (aiMode === 'hard') return aiPickHard();
+  return null;
+}
+
+function performAIMove() {
+  if (gameOver) { stopAI(); return; }
+  // choose a move
+  const pick = aiPickMove();
+  if (!pick) { stopAI(); return; }
+  const [r,c] = pick;
+  const cell = getCell(r,c);
+  if (!cell || !cell.classList.contains('covered') || cell.classList.contains('flagged')) return;
+
+  // simulate click: if first click, ensure mines are placed excluding this cell
+  if (firstClick && !minesPlaced) {
+    placeMines(r,c);
+    firstClick = false;
+  }
+
+  // If hard mode and pick is guaranteed safe but mines not yet placed: ensure minesPlaced maybe false
+  // Reveal logic (reuse existing click handler behaviour)
+  if (isMine(r,c)) {
+    // hitting mine — only allowed for modes other than hard; easy/medium can lose
+    cell.classList.remove('covered');
+    cell.classList.add('revealed','mine');
+    cell.textContent = '💣';
+    gameOver = true;
+    setStatus('Game over', 'lost');
+    revealMines();
+    stopAI();
+    return;
+  } else {
+    revealedCount += floodReveal(r,c);
+    updateCounters();
+    checkWin();
+  }
+}
+
+function startAI() {
+  if (aiRunning) return;
+  aiMode = aiModeSel.value;
+  aiPlayMode = aiPlaySel.value;
+  aiRunning = true;
+  aiToggleBtn.textContent = 'Stop AI';
+  if (aiPlayMode === 'auto') {
+    // run loop every 300ms
+    aiIntervalId = setInterval(() => {
+      if (!aiRunning) return;
+      performAIMove();
+      if (gameOver) stopAI();
+    }, 300);
+  }
+}
+
+function stopAI() {
+  aiRunning = false;
+  aiToggleBtn.textContent = 'Start AI';
+  if (aiIntervalId) { clearInterval(aiIntervalId); aiIntervalId = null; }
+}
+
+aiToggleBtn.addEventListener('click', () => {
+  if (!aiRunning) startAI(); else stopAI();
+});
+
+const originalCellClick = null;
+
+function maybeAIAfterPlayerTurn() {
+  if (!aiRunning) return;
+  aiMode = aiModeSel.value;
+  aiPlayMode = aiPlaySel.value;
+  if (aiPlayMode === 'interactive' && !gameOver) {
+    setTimeout(() => {
+      performAIMove();
+    }, 200);
+  }
+}
+
+// update counters initially
+updateCounters();
 
 /* Initial UI (no game running yet) */
 setStatus('Not started');
