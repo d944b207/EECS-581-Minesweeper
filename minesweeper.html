@@ -414,7 +414,7 @@ function mediumBotClick() {
 
   revealed_cells.forEach(cell => {
     if(cell.textContent != '') {
-      console.log(cell);
+      console.log(`Bot CHECKS cell in row ${cell.dataset.row}, column ${cell.dataset.col}`);
       const row = parseInt(cell.dataset.row);
       const col = parseInt(cell.dataset.col);
 
@@ -433,7 +433,6 @@ function mediumBotClick() {
       // Rule 1: If the number of hidden neighbors of a revealed cell equals that cell’s number
       if (neighbors.length == countAdjacentMines(row, col)) {
           neighbors.forEach((neighbor) => {
-            console.log(`Flagging cell in row ${neighbor.dataset.row}, column ${neighbor.dataset.col} `)
             neighbor.classList.add('flagged','flag-icon');
             neighbor.textContent = '⚑'; // the AI should flag all hidden neighbors
         });
@@ -454,6 +453,7 @@ function mediumBotClick() {
       // Rule 2: If the number of flagged neighbors of a revealed cell equals that cell’s number
       if (neighbors.length == countAdjacentMines(row, col)) {
           neighbors.forEach((neighbor) => {
+            console.log(`Bot CLICKS NEIGHBOR cell in row ${neighbor.dataset.row}, column ${neighbor.dataset.col}`);
             neighbor.click(); // the AI should open all other hidden neighbors
         });
       }
