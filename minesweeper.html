@@ -409,7 +409,7 @@ function easyBotClick() {
 }
 
 function mediumBotClick() { 
-  let revealed_cells = Array.from(document.querySelectorAll('.cell.revealed'));
+  let revealed_cells = document.querySelectorAll('.cell.revealed');
 
   revealed_cells.forEach(cell => {
     if(cell.textContent != '') {
