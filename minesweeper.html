@@ -434,7 +434,8 @@ function mediumBotClick() {
       if (neighbors.length == countAdjacentMines(row, col)) {
           neighbors.forEach((neighbor) => {
             console.log(`Flagging cell in row ${neighbor.dataset.row}, column ${neighbor.dataset.col} `)
-            neighbor.dispatchEvent(rightClickEvent); // the AI should flag all hidden neighbors
+            neighbor.classList.add('flagged','flag-icon');
+            neighbor.textContent = '⚑'; // the AI should flag all hidden neighbors
         });
       }
 
