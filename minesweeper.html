@@ -410,7 +410,6 @@ function easyBotClick() {
 
 function mediumBotClick() { 
   let revealed_cells = Array.from(document.querySelectorAll('.cell.revealed'));
-  console.log(revealed_cells);
 
   revealed_cells.forEach(cell => {
     if(cell.textContent != '') {
@@ -433,6 +432,7 @@ function mediumBotClick() {
       // Rule 1: If the number of hidden neighbors of a revealed cell equals that cell’s number
       if (neighbors.length == countAdjacentMines(row, col)) {
           neighbors.forEach((neighbor) => {
+            console.log(`Bot FLAGS cell in row ${neighbor.dataset.row}, column ${neighbor.dataset.col} `)
             neighbor.classList.add('flagged','flag-icon');
             neighbor.textContent = '⚑'; // the AI should flag all hidden neighbors
         });
