@@ -269,7 +269,13 @@ function checkWin() {
   const safeCells = BOARD_SIZE * BOARD_SIZE - minesTotal;
   if (revealedCount >= safeCells) {
     gameOver = true;
-    setStatus('You won!', 'won');
+    if (!is_auto_game && (player_turn % 2 == 0)) {
+      setStatus('You win!', 'won');
+    } else if (!is_auto_game){
+      setStatus('The bot wins!', 'lost');
+    } else {
+      setStatus('You win!', 'won');
+    }
     revealMines(); // optional: show where they were
     clearInterval(botClicking);
   }
@@ -319,6 +325,9 @@ function buildBoard() {
         if (gameOver) return;
         if (cell.classList.contains('flagged') || !cell.classList.contains('covered')) return;
 
+        const click_sound = new Audio("sound-effects/click_sound.mp3");
+        click_sound.play();
+
         if (firstClick && !minesPlaced) {
           placeMines(row, col);
           firstClick = false;
@@ -332,7 +341,13 @@ function buildBoard() {
           const mine_sound = new Audio("sound-effects/kaboom.mp3");
           mine_sound.play();
           gameOver = true;
-          setStatus('Game over', 'lost');
+          if (!is_auto_game && (player_turn % 2 == 0)) {
+            setStatus('The bot wins!', 'lost');
+          } else if (!is_auto_game) {
+            setStatus('You win!', 'won');
+          } else {
+            setStatus('You lose!', 'lost');
+          }
           revealMines();
         } else {
           revealedCount += floodReveal(row, col);
@@ -343,7 +358,7 @@ function buildBoard() {
 
           console.log(is_auto_game);
           console.log(player_turn);
-          if (!is_auto_game && (player_turn % 2 === 1)) {
+          if (!is_auto_game && (player_turn % 2 === 1) && (!gameOver)) {
             const botDifficulty = document.getElementById("botSelect").value;
             if (botDifficulty == "easy") {
               setTimeout(easyBotClick, 1000); // waits 1000ms, then bot takes turn
@@ -426,6 +441,11 @@ function startAutoGame() {
   else if (botDifficulty == "hard") {
     botClicking = setInterval(hardBotClick, 1000);
   }
+}
+
+function startInteractiveGame() {
+  is_auto_game = false;
+  startGame();
 }
 
 function easyBotClick() {
@@ -752,7 +772,7 @@ mineNumber.addEventListener('input', () => {
   mineRange.value = v;
 });
 
-startBtn.addEventListener('click', startGame);
+startBtn.addEventListener('click', startInteractiveGame);
 startAutoBtn.addEventListener('click', startAutoGame);
 resetBtn.addEventListener('click', resetGame);
 //startBotBtn.addEventListener('click', startBotGame);
