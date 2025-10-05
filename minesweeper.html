@@ -453,9 +453,9 @@ function mediumBotClick() {
               neighbor.classList.add('flagged','flag-icon');
               neighbor.textContent = '⚑'; // the AI should flag all hidden neighbors
               flagsPlaced++;
+              rule1_activation = true;
             }
         });
-        rule1_activation = true;
         //update flag counter
         updateCounters();
       }
@@ -485,6 +485,8 @@ function mediumBotClick() {
     }
   });
 
+  console.log(`Rule 1: ${rule1_activation}`);
+  console.log(`Rule 2: ${rule2_activation}`);
   //If no rule applies, the AI should pick a random hidden cell.
   if (!rule1_activation && !rule2_activation) {
     easyBotClick();
@@ -533,9 +535,9 @@ function hardBotClick() {
               neighbor.classList.add('flagged','flag-icon');
               neighbor.textContent = '⚑'; // the AI should flag all hidden neighbors
               flagsPlaced++;
+              rule1_activation = true;
             }
           });
-          rule1_activation = true;
           //update flag counter
           updateCounters();
         }
@@ -599,29 +601,29 @@ function hardBotClick() {
               current_up_left.classList.add('flagged','flag-icon');
               current_up_left.textContent = '⚑';
               flagsPlaced++;
+              rule3_activation = true;
             }
             if (current_up_right != null && !current_up_right.classList.contains("revealed") && !current_up_right.classList.contains('flagged')) {
               current_up_right.classList.add('flagged','flag-icon');
               current_up_right.textContent = '⚑';
               flagsPlaced++;
+              rule3_activation = true;
             }
             if (current_down_left != null && !current_down_left.classList.contains("revealed") && !current_down_left.classList.contains('flagged')) {
               current_down_left.classList.add('flagged','flag-icon');
               current_down_left.textContent = '⚑';
               flagsPlaced++;
+              rule3_activation = true;
             }
             if (current_down_right != null && !current_down_right.classList.contains("revealed") && !current_down_right.classList.contains('flagged')) {
               current_down_right.classList.add('flagged','flag-icon');
               current_down_right.textContent = '⚑';
               flagsPlaced++;
+              rule3_activation = true;
             }
-
-            rule3_activation = true;
 
             //update flag counter
             updateCounters();
-
-
           }
         }
       }
@@ -682,6 +684,9 @@ function hardBotClick() {
       }
     }
 
+    console.log(`Rule 1: ${rule1_activation}`);
+    console.log(`Rule 2: ${rule2_activation}`);
+    console.log(`Rule 3: ${rule3_activation}`);
     //random pick if rule 2 did not trigger
     if (!rule1_activation && !rule2_activation && !rule3_activation) {
       easyBotClick();
@@ -695,9 +700,7 @@ function clickBoard(setting) {
   }
   else if (setting == "disable") {
     board.style = "pointer-events: none;"
-  botClicking = setInterval(botClick, 500);
-  //botClick();
-}
+  }
 }
 
 /* === Controls wiring === */
