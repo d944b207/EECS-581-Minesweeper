@@ -167,6 +167,8 @@ let botClicking;
 let player_turn = 0;
 let is_auto_game = false;
 let did_bot_click_already = false;
+const flagAudio = new Audio('sound-effects/flag.mp3'); //flag audio here
+flagAudio.preload = 'auto'; //preload audio file immediately (necessary for other sound effects too)
 
 /* === Helpers === */
 // update game status display
@@ -375,6 +377,8 @@ function buildBoard() {
 
       // Right click (flag)
       cell.addEventListener('contextmenu', (e) => {
+        flagAudio.currentTime = 0; //Set up right click (flag) audio
+        flagAudio.play().catch(() => { /* ignore play errors */ }); //Play right click (flag) audio
         e.preventDefault();
         if (gameOver) return;
         if (cell.classList.contains('revealed')) return;
@@ -489,6 +493,8 @@ function mediumBotClick() {
       if (neighbors.length == countAdjacentMines(row, col)) {
           neighbors.forEach((neighbor) => {
             if (!neighbor.classList.contains('flagged')) {
+              flagAudio.currentTime = 0; //Set up right click (flag) audio
+              flagAudio.play().catch(() => { /* ignore play errors */ }); //Play right click (flag) audio
               // console.log(`Bot FLAGS cell in row ${parseInt(neighbor.dataset.row) + 1}, column ${parseInt(neighbor.dataset.col) + 1} `)
               neighbor.classList.add('flagged','flag-icon');
               neighbor.textContent = '⚑'; // the AI should flag all hidden neighbors
@@ -580,6 +586,8 @@ function hardBotClick() {
         if (neighbors.length == countAdjacentMines(row_index, column_index)) {
           neighbors.forEach((neighbor) => {
             if (!neighbor.classList.contains('flagged')) {
+              flagAudio.currentTime = 0; //Set up right click (flag) audio
+              flagAudio.play().catch(() => { /* ignore play errors */ }); //Play right click (flag) audio
               console.log(`Bot FLAGS cell in row ${parseInt(neighbor.dataset.row) + 1}, column ${parseInt(neighbor.dataset.col) + 1} `)
               neighbor.classList.add('flagged','flag-icon');
               neighbor.textContent = '⚑'; // the AI should flag all hidden neighbors
@@ -647,24 +655,32 @@ function hardBotClick() {
 
             //flag each corner if it exists, isn't revealed, and doesn't already contain a flag
             if (current_up_left != null && !current_up_left.classList.contains("revealed") && !current_up_left.classList.contains('flagged')) {
+              flagAudio.currentTime = 0; //Set up right click (flag) audio
+              flagAudio.play().catch(() => { /* ignore play errors */ }); //Play right click (flag) audio
               current_up_left.classList.add('flagged','flag-icon');
               current_up_left.textContent = '⚑';
               flagsPlaced++;
               rule3_activation = true;
             }
             if (current_up_right != null && !current_up_right.classList.contains("revealed") && !current_up_right.classList.contains('flagged')) {
+              flagAudio.currentTime = 0; //Set up right click (flag) audio
+              flagAudio.play().catch(() => { /* ignore play errors */ }); //Play right click (flag) audio
               current_up_right.classList.add('flagged','flag-icon');
               current_up_right.textContent = '⚑';
               flagsPlaced++;
               rule3_activation = true;
             }
             if (current_down_left != null && !current_down_left.classList.contains("revealed") && !current_down_left.classList.contains('flagged')) {
+              flagAudio.currentTime = 0; //Set up right click (flag) audio
+              flagAudio.play().catch(() => { /* ignore play errors */ }); //Play right click (flag) audio
               current_down_left.classList.add('flagged','flag-icon');
               current_down_left.textContent = '⚑';
               flagsPlaced++;
               rule3_activation = true;
             }
             if (current_down_right != null && !current_down_right.classList.contains("revealed") && !current_down_right.classList.contains('flagged')) {
+              flagAudio.currentTime = 0; //Set up right click (flag) audio
+              flagAudio.play().catch(() => { /* ignore play errors */ }); //Play right click (flag) audio
               current_down_right.classList.add('flagged','flag-icon');
               current_down_right.textContent = '⚑';
               flagsPlaced++;
