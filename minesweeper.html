@@ -433,6 +433,7 @@ function resetGame() {
   // keep same minesTotal; just rebuild fresh
   gameOver = true;
   if (is_auto_game) {
+    clearInterval(botClicking);
     startAutoGame();
   } else {
     startInteractiveGame();
