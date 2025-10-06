@@ -377,8 +377,6 @@ function buildBoard() {
 
       // Right click (flag)
       cell.addEventListener('contextmenu', (e) => {
-        flagAudio.currentTime = 0; //Set up right click (flag) audio
-        flagAudio.play().catch(() => { /* ignore play errors */ }); //Play right click (flag) audio
         e.preventDefault();
         if (gameOver) return;
         if (cell.classList.contains('revealed')) return;
@@ -386,6 +384,8 @@ function buildBoard() {
         const add = !cell.classList.contains('flagged');
         if (add) {
           if (flagsPlaced >= minesTotal) return; // no more flags
+          flagAudio.currentTime = 0; //Set up right click (flag) audio
+          flagAudio.play().catch(() => { /* ignore play errors */ }); //Play right click (flag) audio
           cell.classList.add('flagged','flag-icon');
           cell.textContent = '⚑';
           flagsPlaced++;
@@ -433,23 +433,27 @@ function resetGame() {
 }
 
 function startAutoGame() {
-  is_auto_game = true;
-  startGame();
-  const botDifficulty = document.getElementById("botSelect").value;
-  if (botDifficulty == "easy") {
-    botClicking = setInterval(easyBotClick, 500);
-  }
-  else if (botDifficulty == "medium") {
-    botClicking = setInterval(mediumBotClick, 1000);
-  }
-  else if (botDifficulty == "hard") {
-    botClicking = setInterval(hardBotClick, 1000);
+  if (gameOver) {
+    is_auto_game = true;
+    startGame();
+    const botDifficulty = document.getElementById("botSelect").value;
+    if (botDifficulty == "easy") {
+      botClicking = setInterval(easyBotClick, 500);
+    }
+    else if (botDifficulty == "medium") {
+      botClicking = setInterval(mediumBotClick, 1000);
+    }
+    else if (botDifficulty == "hard") {
+      botClicking = setInterval(hardBotClick, 1000);
+    }
   }
 }
 
 function startInteractiveGame() {
-  is_auto_game = false;
-  startGame();
+  if (gameOver) {
+    is_auto_game = false;
+    startGame();
+  }
 }
 
 function easyBotClick() {
